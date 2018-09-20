@@ -23,14 +23,14 @@ class FishyProcessor extends RichCoFlatMapFunction[Boat,Store,FishyResult]{
       result = fishState.value()
     }
 
-    fishState.update(result.copy(quantity = result.quantity + value.quantity))
-    println("in flatmap1 : " + fishState.value())
+    fishState.update(result.copy(value.typeOfObject,quantity = result.quantity + value.quantity))
+    println(fishState.value())
   }
 
   override def flatMap2(value: Store, out: Collector[FishyResult]): Unit = {
     val result = fishState.value()
-    fishState.update(result.copy(quantity = result.quantity - value.quantity))
-    println("in flatmap2 : " + fishState.value())
+    fishState.update(result.copy(value.typeOfObject,quantity = result.quantity - value.quantity))
+    println(fishState.value())
   }
 
   override def open(parameters: Configuration): Unit = {
@@ -38,4 +38,7 @@ class FishyProcessor extends RichCoFlatMapFunction[Boat,Store,FishyResult]{
     state.setQueryable("fishyResult")
     fishState = getRuntimeContext.getState(state)
   }
+
+  def display()= if(fishState!=null)println(fishState.value().typeOfObject + "" + fishState.value().quantity)
+
 }

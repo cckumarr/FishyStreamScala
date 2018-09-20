@@ -10,11 +10,13 @@ object FishyJob {
     val storePort = 3000
     val boatHost = "localhost"
     val storeHost = "localhost"
+    val strTocompareWith = "salmon,tuna,cod"
 
     println("starting the job.")
 
     val boats = env.socketTextStream(boatHost, boatPort).map(Boat.fromString(_))
       .flatMap(DataCollector[Boat])
+      .filter(boat => strTocompareWith.contains(boat.typeOfObject))
       .keyBy(_.typeOfObject)
 
     val stores = env.socketTextStream(storeHost, storePort).map(Store.fromString(_))
@@ -23,7 +25,6 @@ object FishyJob {
 
     boats.connect(stores).flatMap(FishyProcessor()).print()
 
-    println("completed")
     env.execute()
   }
 }
